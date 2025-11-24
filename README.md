@@ -115,11 +115,10 @@ To support comprehensive evaluation and training, we construct **VRS**, the firs
 📌 **10 robot embodiments** (Franka, Fanuc Mate, UR5, Kuka iiwa, Google Robot, MobileALOHA, xArm, WindowX, Sawyer, Hello Stretch)  
 📌 Fine-grained masks for **arm**, **gripper**, and **whole robot**
 
-<img src="assets/robot.png">
+<img src="assets/robot.png" width="100%">
+<img src="assets/data1.png" width="100%">
+<img src="assets/data2.png" width="100%">
 
-<img src="assets/data1.png">
-
-<img src="assets/data2.png">
 
 ---
 

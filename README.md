@@ -1,16 +1,64 @@
-# RobotSeg
+<p align="center">
+    <h1 align="center">
+        RobotSeg:
+        <br>
+        A Model and Dataset for Segmenting Robots in Image and Video
+    </h1>
+</p>
 
-RobotSeg: A Model and Dataset for Segmenting Robots in Image and Video
+<p align="center">
+  <a href="https://mhaiyang.github.io/">Haiyang Mei</a>&nbsp;&nbsp;&nbsp;
+  <a href="https://openreview.net/profile?id=~Huang_Qiming1">Qiming Huang</a>&nbsp;&nbsp;&nbsp;   
+  <a href="https://haici.cc/">Hai Ci</a>&nbsp;&nbsp;&nbsp;  
+  <a href="https://sites.google.com/view/showlab">Mike Zheng Shou*</a>  
+  <br>
+  Show Lab, National University of Singapore
+  <br>
+  *Corresponding Author
+</p>
 
-# 🤖 RobotSeg: A Model and Dataset for Segmenting Robots in Image and Video
+<div align="center">
+  <p>
+    <a href="https://arxiv.org/abs/2511.xxxxx">
+      <img src="https://img.shields.io/badge/arXiv-grey?logo=arxiv&logoColor=white&labelColor=red">
+    </a>
+    <a href="https://x.com/xxx">
+      <img src="https://img.shields.io/badge/Post-grey?logo=x&logoColor=white&labelColor=black">
+    </a>
+  </p>
+</div>
 
-RobotSeg is a dedicated foundation model and large-scale dataset for **robot segmentation in both images and videos**.  
-It is built upon **SAM 2** and introduces architecture enhancements that make segmentation of robot embodiments more accurate, robust, and structure-preserving.
+<br>
 
-**Authors:** Haiyang Mei, Qiming Huang, Hai Ci, Mike Zheng Shou  
-**Affiliation:** Show Lab, National University of Singapore  
+<p align="center">
+  <a href="https://showlab.github.io/RobotSeg/assets/vid_intro.mp4">
+    <img src="./vid_intro.gif" alt="Watch the video" width="600">
+  </a>
+</p>
 
-📄 **Paper PDF:** RobotSeg.pdf
+
+We introduce **RobotSeg**, the first foundation model for robot segmentation that (i) supports both images and videos, (ii) enables fine-grained segmentation of the robot arm, gripper, and whole robot, and (iii) offers promptable capabilities for flexible editing and annotation.
+
+---
+
+This is the official repository of RobotSeg. If you find our work useful, please consider citing our paper:
+```
+@article{mei2025robotseg,
+      title={RobotSeg: A Model and Dataset for Segmenting Robots in Image and Video}, 
+      author={Mei, Haiyang and Huang, Qiming and Ci, Hai and Shou, Mike Zheng},
+      journal={arXiv:2511.xxxxx},
+      year={2025}
+}
+```
+
+## Table of Contents
+
+- [Environment Setup](#environment-setup)
+- [Training](#training)
+- [Evaluation](#evaluation)
+- [Common Questions](#common-questions)
+- [Acknowledgement](#acknowledgement)
+
 
 ---
 

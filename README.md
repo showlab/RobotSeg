@@ -37,7 +37,7 @@
 </p>
 
 
-We introduce **RobotSeg**, the first foundation model for robot segmentation that (i) supports both images and videos, (ii) enables fine-grained segmentation of the robot arm, gripper, and whole robot, and (iii) offers promptable capabilities for flexible editing and annotation.
+We introduce **RobotSeg**, the first foundation model for robot segmentation that **(i)** supports both images and videos, **(ii)** enables fine-grained segmentation of the robot arm, gripper, and whole robot, and **(iii)** offers promptable capabilities for flexible editing and annotation.
 
 ---
 
@@ -51,64 +51,39 @@ This is the official repository of RobotSeg. If you find our work useful, please
 }
 ```
 
+
 ## Table of Contents
 
-- [Environment Setup](#environment-setup)
-- [Training](#training)
-- [Evaluation](#evaluation)
-- [Common Questions](#common-questions)
-- [Acknowledgement](#acknowledgement)
+- [🚀 1. Introduction](#-1-introduction)
+- [🎥 2. VRS Dataset](#-2-vrs-dataset)
+- [✨ 3. RobotSeg Model](#-3-robotseg-model)
+- [🏆 4. State-of-the-Art Performance](#-4-state-of-the-art-performance)
+- [🦾 5. Applications of RobotSeg](#-5-applications-of-robotseg)
+- [🙌 6. Acknowledgments](#-6-acknowledgments)
 
 
----
+## 🚀 1. Introduction
 
-## 🚀 Highlights
+Existing segmentation models such as SAM 1/2/3 are remarkably powerful, yet it is surprising ⚡️ that they still struggle to segment robots reliably.
 
-### ⭐ RobotSeg Model
-- Extends **SAM 2** into a robot-aware video segmentation model  
-- Supports **zero-click automatic segmentation**  
-- Produces **structure-preserving masks**, avoiding broken links or missing grippers  
-- Compact: **41.3M** parameters, smaller than robot-specific and language-conditioned baselines
+We are thrilled to introduce **RobotSeg** ✨, the first foundation model and dataset designed specifically for segmenting robots in images and videos.
 
-### ⭐ VRS Dataset (Video Robot Segmentation)
-- **2,812 videos**, **138,707 labeled frames**  
-- 10+ robot embodiments  
-- Hierarchical labels: robot **arm**, **gripper**, **whole robot**  
-- Training uses **only first-frame annotations**, enabling label-efficient learning
+**RobotSeg** targets four challenges that make robot segmentation uniquely difficult ⚡️:
 
-### ⭐ Superior Performance
-RobotSeg outperforms:
-- Robot-specific models  
-- Language-conditioned models  
-- SAM 2.1 baseline
+- Embodiment Diversity – robots vary dramatically in shape, size, and articulation  
+- Appearance Ambiguity – their visual patterns often blend with cluttered backgrounds  
+- Structural Complexity – articulated arm links, joints, and grippers form intricate structures  
+- Rapid Shape Changes – fast manipulation causes large geometric and motion variations  
 
-Across:
-- Automatic (0-click)
-- 1-click / 3-click prompts
-- Bounding-box prompts
-- Online interactive refinement
+<img src="assets/teaser.png" width="100%">
 
----
+**RobotSeg** delivers accurate and consistent robot masks that support:  
+🧩 robot-centric data augmentation  
+🏗️ digital-twin reconstruction for robotic systems  
+🤖 robot pose and action extraction
 
-## 🧩 RobotSeg Method
 
-### 1. Structure-Enhanced Memory Associator (SEMA)
-- Injects multi-scale structure cues  
-- Preserves thin robot parts  
-- Improves temporal coherence  
-
-### 2. Robot Prompt Generator (RPG)
-- Provides robot-aware prompt tokens  
-- Enables **automatic robot segmentation**  
-
-### 3. Label-Efficient Training Strategy (LET)
-- Cycle consistency  
-- Semantic consistency  
-- Patch-level consistency  
-
----
-
-## 🎥 VRS Dataset
+## 🎥 2. VRS Dataset
 
 To support comprehensive evaluation and training, we construct **VRS**, the first video robot segmentation benchmark:  
 📌 **2,812 videos (138,707 frames)**  
@@ -120,8 +95,52 @@ To support comprehensive evaluation and training, we construct **VRS**, the firs
 <img src="assets/data2.png" width="100%">
 
 
----
+## ✨ 3. RobotSeg Model
 
-## 🙌 Acknowledgments
+Built upon [SAM 2](https://github.com/facebookresearch/sam2), RobotSeg introduces three robot-centric innovations:
+
+✨ **Structure-Enhanced Memory Associator (SEMA)**: injects robot structural cues into memory matching to maintain stable, structure-preserving masks across video frames  
+✨ **Robot Prompt Generator (RPG)**: produces semantic robot prompts that guide segmentation without requiring manual click or box inputs  
+✨ **Label-Efficient Training (LET)**: supervises the model using only the first-frame ground-truth mask through cycle, semantic, and patch consistency losses
+
+<img src="assets/pipeline.png" width="100%">
+
+
+## 🏆 4. State-of-the-Art Performance 
+🔥 **Leading performance** over robot-specific baselines (RoVi-Aug, RoboEngine)  
+🔥 Outperforms language-conditioned approaches including CLIPSeg, LISA, EVF-SAM, VideoLISA, and SAM 3  
+🔥 Surpasses **SAM 2.1** across prompt settings (automatic, 1-click, 3-click, box, online-interactive)  
+🔥 Lightweight: only **41.3M parameters** and **runs >10 FPS in inference**  
+🔥 Robust to 10 diverse robot embodiments  
+
+#### 4.1 Comparisons of image robot segmentation
+<img src="assets/roboengine_results.png" width="50%">
+
+#### 4.2 Comparisons of video robot segmentation
+<img src="assets/vrs_results.png" width="100%">
+
+#### 4.3 Comparisons of computational efficiency
+<img src="assets/efficiency.png" width="45%">
+
+
+## 🦾 5. Applications of RobotSeg
+
+RobotSeg delivers accurate and consistent robot masks that support:
+
+#### 5.1 Robot-Centric Data Augmentation
+
+Precise robot masks allow compositing the robot into new environments, generating diverse visual conditions for robust policy learning and sim-to-real adaptation.
+
+<p align="center"> <img src="assets/aug.png" width="100%"> </p>
+
+#### 5.2 Robot 3D Reconstruction
+
+RobotSeg provides accurate robot masks that can be used by modern 3D reconstruction pipelines (e.g., [SAM-3D Objects](https://github.com/facebookresearch/sam-3d-objects)) to generate high-quality robot geometry for digital-twin modeling.
+
+<p align="center"> <img src="assets/sam3d.png" width="60%"> </p>
+
+## 🙌 6. Acknowledgments
 
 RobotSeg is built upon [SAM 2](https://github.com/facebookresearch/sam2).
+
+**[⬆ back to top](#-1-introduction)**

@@ -90,7 +90,7 @@ Across:
 
 ---
 
-## 🧩 Method Overview
+## 🧩 RobotSeg Method
 
 ### 1. Structure-Enhanced Memory Associator (SEMA)
 - Injects multi-scale structure cues  
@@ -110,40 +110,19 @@ Across:
 
 ## 🎥 VRS Dataset
 
-- Long video sequences  
-- Diverse scenes  
-- Fine-grained hierarchical labels  
-- Fully annotated test set  
-- First-frame annotated training set  
+To support comprehensive evaluation and training, we construct **VRS**, the first video robot segmentation benchmark:  
+📌 **2,812 videos (138,707 frames)**  
+📌 **10 robot embodiments** (Franka, Fanuc Mate, UR5, Kuka iiwa, Google Robot, MobileALOHA, xArm, WindowX, Sawyer, Hello Stretch)  
+📌 Fine-grained masks for **arm**, **gripper**, and **whole robot**
 
----
+<img src="assets/robot.png">
 
-## 📦 Getting Started (Template)
+<img src="assets/data1.png">
 
-```bash
-git clone https://github.com/yourname/RobotSeg.git
-cd RobotSeg
-
-conda create -n robotseg python=3.10
-conda activate robotseg
-pip install -r requirements.txt
-```
-
----
-
-## 🔖 BibTeX
-
-```bibtex
-@misc{mei2025robotseg,
-  title        = {RobotSeg: A Model and Dataset for Segmenting Robots in Image and Video},
-  author       = {Haiyang Mei and Qiming Huang and Hai Ci and Mike Zheng Shou},
-  year         = {2025},
-  note         = {Preprint},
-}
-```
+<img src="assets/data2.png">
 
 ---
 
 ## 🙌 Acknowledgments
 
-RobotSeg is developed at **Show Lab, National University of Singapore**.
+RobotSeg is built upon [SAM 2](https://github.com/facebookresearch/sam2).

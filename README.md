@@ -2,7 +2,9 @@
     <h1 align="center">
         RobotSeg:
         <br>
-        A Model and Dataset for Segmenting Robots in Image and Video
+        A Model and Dataset for Segmenting Robots
+        <br>
+        in Image and Video
     </h1>
 </p>
 
@@ -81,10 +83,7 @@ To support comprehensive evaluation and training, we construct **VRS**, the firs
 <img src="assets/robot.png" width="800">
 </p>
 <p align="center">
-<img src="assets/data1.png" width="800">
-</p>
-<p align="center">
-<img src="assets/data2.png" width="800">
+<img src="assets/GT_Example.gif" width="800">
 </p>
 
 ## ✨ 3. RobotSeg Model
@@ -116,7 +115,7 @@ Built upon [SAM 2](https://github.com/facebookresearch/sam2), RobotSeg introduce
 <img src="assets/vrs_results.png" width="800">
 </p>
 
-##### 4.2.1 comparison against image-level robot segmentation method RoboEngine
+- Comparison against image-level robot segmentation method RoboEngine
 <p align="center">
 <img src="assets/11_cropped.gif" width="700">
 </p>
@@ -129,7 +128,7 @@ Built upon [SAM 2](https://github.com/facebookresearch/sam2), RobotSeg introduce
 <img src="assets/13_cropped.gif" width="700">
 </p>
 
-##### 4.2.2 comparison against general promptable segmentation method SAM 2.1
+- comparison against general promptable segmentation method SAM 2.1
 <p align="center">
 <img src="assets/21_cropped.gif" width="700">
 </p>

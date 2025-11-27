@@ -40,7 +40,7 @@ We introduce **RobotSeg**, the first foundation model for robot segmentation tha
 
 
 [Table of Contents](#0-table-of-contents)  
-[ 🚀 1. Introduction](#-1-introduction)  
+[🚀 1. Introduction](#-1-introduction)  
 [🎥 2. VRS Dataset](#-2-vrs-dataset)  
 [✨ 3. RobotSeg Model](#-3-robotseg-model)  
 [🏆 4. State-of-the-Art Performance](#-4-state-of-the-art-performance)  

@@ -80,11 +80,9 @@ To support comprehensive evaluation and training, we construct **VRS**, the firs
 📌 Fine-grained masks for **arm**, **gripper**, and **whole robot**
 
 <p align="center">
-<img src="assets/robot.png" width="800">
+<img src="assets/VRS.gif" width="800">
 </p>
-<p align="center">
-<img src="assets/GT_Example.gif" width="800">
-</p>
+
 
 ## ✨ 3. RobotSeg Model
 

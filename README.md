@@ -144,7 +144,11 @@ Table below summarizes the quantitative comparisons on the RoboEngine (image) an
 
 (d) Comparison under point or box prompts
 <p align="center">
-<img src="assets/xx_cropped.gif" width="700">
+<img src="assets/Prompt_1c_cropped.gif" width="700">
+</p>
+
+<p align="center">
+<img src="assets/Prompt_bb_cropped.gif" width="700">
 </p>
 
 

@@ -104,7 +104,7 @@ Built upon [SAM 2](https://github.com/facebookresearch/sam2), RobotSeg introduce
 🔥 Robust to 10 diverse robot embodiments  
 
 #### 4.1 Quantitative Comparison
-Comparisons of the image robot segmentation on RoboEngine dataset and the video robot segmentation on VRS dataset, under diverse settings (i.e., automatic AU, 1-click 1C, 3-click 3C, bounding-box BB, and online-interactive OI). "–" denotes that the method does not support this setting. RobotSeg delivers the best segmentation performance while maintaining competitive computational efficiency.
+Table below summarizes the quantitative comparisons on the RoboEngine (image) and VRS (video) datasets across diverse settings (i.e., automatic AU, 1-click 1C, 3-click 3C, bounding-box BB, and online-interactive OI). "–" denotes that the method does not support this setting. RobotSeg delivers the best segmentation performance while maintaining competitive computational efficiency.
 <p align="center">
 <img src="assets/results.png" width="600">
 </p>

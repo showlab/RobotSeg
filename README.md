@@ -103,17 +103,15 @@ Built upon [SAM 2](https://github.com/facebookresearch/sam2), RobotSeg introduce
 🔥 Lightweight: only **41.3M parameters** and **runs >10 FPS in inference**  
 🔥 Robust to 10 diverse robot embodiments  
 
-#### 4.1 Comparisons of image robot segmentation
+#### 4.1 Quantitative Comparison
+Comparisons of the image robot segmentation on RoboEngine dataset and the video robot segmentation on VRS dataset, under diverse settings (i.e., automatic AU, 1-click 1C, 3-click 3C, bounding-box BB, and online-interactive OI). "–" denotes that the method does not support this setting. RobotSeg delivers the best segmentation performance while maintaining competitive computational efficiency.
 <p align="center">
-<img src="assets/roboengine_results.png" width="400">
+<img src="assets/results.png" width="600">
 </p>
 
-#### 4.2 Comparisons of video robot segmentation
-<p align="center">
-<img src="assets/vrs_results.png" width="800">
-</p>
 
-- Comparison against image-level robot segmentation method RoboEngine
+#### 4.2 Qualitative Comparison
+(a) Comparison against image-level robot segmentation method RoboEngine
 <p align="center">
 <img src="assets/11_cropped.gif" width="700">
 </p>
@@ -126,7 +124,7 @@ Built upon [SAM 2](https://github.com/facebookresearch/sam2), RobotSeg introduce
 <img src="assets/13_cropped.gif" width="700">
 </p>
 
-- comparison against general promptable segmentation method SAM 2.1
+(b) Comparison against general promptable segmentation method SAM 2.1
 <p align="center">
 <img src="assets/21_cropped.gif" width="700">
 </p>
@@ -135,13 +133,18 @@ Built upon [SAM 2](https://github.com/facebookresearch/sam2), RobotSeg introduce
 <img src="assets/22_cropped.gif" width="700">
 </p>
 
-##### 4.2.3 comparison against concept segmentation method SAM 3
+(c) Comparison against concept segmentation method SAM 3
 <p align="center">
 <img src="assets/31_cropped.gif" width="700">
 </p>
 
 <p align="center">
 <img src="assets/32_cropped.gif" width="700">
+</p>
+
+(d) Comparison under point or box prompts
+<p align="center">
+<img src="assets/xx_cropped.gif" width="700">
 </p>
 
 #### 4.3 Comparisons of computational efficiency

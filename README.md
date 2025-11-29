@@ -147,11 +147,6 @@ Table below summarizes the quantitative comparisons on the RoboEngine (image) an
 <img src="assets/xx_cropped.gif" width="700">
 </p>
 
-#### 4.3 Comparisons of computational efficiency
-<p align="center">
-<img src="assets/efficiency.png" width="360">
-</p>
-
 
 ## 🦾 5. Applications of RobotSeg
 

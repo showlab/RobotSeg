@@ -33,7 +33,7 @@
 </p>
 
 
-We introduce **RobotSeg**, the first foundation model for robot segmentation that:
+We introduce **RobotSeg**, the first foundation model for robot segmentation that : 🌈
 1. supports both images and videos,
 2. enables fine-grained segmentation of the robot arm, gripper, and whole robot, and 
 3. offers promptable capabilities for flexible editing and annotation.
@@ -56,7 +56,7 @@ Existing segmentation models such as SAM 1/2/3 are powerful, yet it is surprisin
 
 We are thrilled to introduce **RobotSeg** ✨, the first foundation model and dataset designed specifically for segmenting robots in image and video.
 
-RobotSeg supports automatic segmentation for both image and video, fine-grained arm–gripper–robot segmentation, and flexible promptable interaction. 🌈
+[//]: # (RobotSeg supports automatic segmentation for both image and video, fine-grained arm–gripper–robot segmentation, and flexible promptable interaction. 🌈)
 
 RobotSeg delivers accurate and consistent robot masks that support:  
 🤖 visual servoing for VLA systems  

@@ -29,7 +29,7 @@
 </div>
 
 <p align="center">
-  <img src="assets/RobotSeg_Video.gif" alt="Watch the video" width="800">
+  <img src="assets/1_teaser_video.gif" alt="Watch the video" width="800">
 </p>
 
 

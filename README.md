@@ -19,20 +19,21 @@
 
 <div align="center">
   <p>
-    <a href="https://arxiv.org/abs/2511.22950">
+    <a href="https://arxiv.org/abs/2511.22950" target="_blank" rel="noopener noreferrer">
       <img src="https://img.shields.io/badge/arXiv-grey?logo=arxiv&logoColor=white&labelColor=red">
     </a>
-    <a href="https://youtu.be/BXEOf0zAFDA">
+    <a href="https://youtu.be/BXEOf0zAFDA" target="_blank" rel="noopener noreferrer">
       <img src="https://img.shields.io/badge/YouTube-Video-grey?logo=youtube&logoColor=white&labelColor=FF0000">
     </a>
-    <a href="https://x.com/xxx">
+    <a href="https://x.com/xxx" target="_blank" rel="noopener noreferrer">
       <img src="https://img.shields.io/badge/Post-grey?logo=x&logoColor=white&labelColor=black">
     </a>
   </p>
 </div>
 
 <p align="center">
-  <img src="assets/1_teaser_video.gif" alt="Watch the video" width="800">
+  <a href="https://youtu.be/BXEOf0zAFDA" target="_blank" rel="noopener noreferrer"><img src="assets/1_teaser_video.gif" alt="Watch the video" width="800">
+    </a>
 </p>
 
 

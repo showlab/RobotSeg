@@ -22,7 +22,7 @@
     <a href="https://arxiv.org/abs/2511.22950" target="_blank">
       <img src="https://img.shields.io/badge/arXiv-grey?logo=arxiv&logoColor=white&labelColor=red">
     </a>
-    <a href="https://youtu.be/BXEOf0zAFDA" target="_blank">
+    <a href="https://youtu.be/AwkNMVNB_IY" target="_blank">
       <img src="https://img.shields.io/badge/YouTube-Video-grey?logo=youtube&logoColor=white&labelColor=FF0000">
     </a>
     <a href="https://x.com/xxx" target="_blank">
@@ -32,7 +32,7 @@
 </div>
 
 <p align="center">
-  <a href="https://youtu.be/BXEOf0zAFDA" target="_blank"><img src="assets/1_teaser_video.gif" alt="Watch the video" width="800">
+  <a href="https://youtu.be/AwkNMVNB_IY" target="_blank"><img src="assets/1_teaser_video.gif" alt="Watch the video" width="800">
     </a>
 </p>
 

@@ -22,6 +22,9 @@
     <a href="https://arxiv.org/abs/2511.22950">
       <img src="https://img.shields.io/badge/arXiv-grey?logo=arxiv&logoColor=white&labelColor=red">
     </a>
+    <a href="https://youtu.be/BXEOf0zAFDA">
+      <img src="https://img.shields.io/badge/YouTube-Video-grey?logo=youtube&logoColor=white&labelColor=FF0000">
+    </a>
     <a href="https://x.com/xxx">
       <img src="https://img.shields.io/badge/Post-grey?logo=x&logoColor=white&labelColor=black">
     </a>

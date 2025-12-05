@@ -87,7 +87,7 @@ RobotSeg delivers accurate and consistent robot masks that support:
 
 To support comprehensive evaluation and training, we construct **VRS**, the first video robot segmentation benchmark:  
 📌 **2,812 videos (138,707 frames)**  
-📌 **10 robot embodiments** (Franka, Fanuc Mate, UR5, Kuka iiwa, Google Robot, MobileALOHA, xArm, WindowX, Sawyer, Hello Stretch)  
+📌 **10 robot embodiments** (Franka, Fanuc Mate, UR5, Kuka iiwa, Google Everyday Robot, MobileALOHA, xArm, WindowX, Sawyer, Hello Stretch)  
 📌 Fine-grained masks for **arm**, **gripper**, and **whole robot**
 
 <p align="center">

@@ -25,8 +25,8 @@
     <a href="https://youtu.be/AwkNMVNB_IY" target="_blank">
       <img src="https://img.shields.io/badge/YouTube-Video-grey?logo=youtube&logoColor=white&labelColor=FF0000">
     </a>
-    <a href="https://x.com/xxx" target="_blank">
-      <img src="https://img.shields.io/badge/Post-grey?logo=x&logoColor=white&labelColor=black">
+    <a href="https://www.linkedin.com/posts/mike-zheng-shou-09a4a185_segment-anything-models-sam-are-powerful-activity-7406889660959977472-9zwr?utm_source=share&utm_medium=member_desktop&rcm=ACoAAFwJPuoBi8onyq9O1MMphHCiude2cllTy8Q" target="_blank">
+      <img src="https://img.shields.io/badge/LinkedIn-Post-grey?logo=linkedin&logoColor=white&labelColor=0A66C2">
     </a>
   </p>
 </div>

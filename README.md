@@ -1,17 +1,15 @@
-<div align="center">
-  <h1>
+<p align="center">
+  <h1 align="center">
     RobotSeg:
     <br>
     A Model and Dataset for Segmenting Robots
     <br>
     in Image and Video
   </h1>
-  <p>
-    <span style="font-size: 18px; font-weight: 700; color: #1e3a8a;">
-      CVPR 2026 Oral
-    </span>
+  <p align="center" style="font-size: 1.3em; color: #1f77b4;">
+    <b>CVPR 2026 Oral</b>
   </p>
-</div>
+</p>
 
 <p align="center">
   <a href="https://mhaiyang.github.io/">Haiyang Mei</a>&nbsp;&nbsp;&nbsp;
@@ -56,12 +54,12 @@ We introduce **RobotSeg**, the first foundation model for robot segmentation tha
 [🏆 5. State-of-the-Art Performance](#-5-state-of-the-art-performance)  
 [🦾 6. Applications of RobotSeg](#-6-applications-of-robotseg)  
 [🛠️ 7. Getting Started](#-7-getting-started)  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.1 Installation](#71-installation)  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.2 Download](#72-download)  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.3 Demo Use](#73-demo-use)  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.4 Testing](#74-testing)  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.5 Evaluation](#75-evaluation)  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.6 Training](#76-training)   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.1 Installation](#71-installation)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.2 Download](#72-download)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.3 Demo Use](#73-demo-use)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.4 Testing](#74-testing)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.5 Evaluation](#75-evaluation)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.6 Training](#76-training)   
 [🙌 8. Acknowledgments](#-8-acknowledgments)  
 [📚 9. Citation](#-9-citation)
 

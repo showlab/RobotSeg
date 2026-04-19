@@ -1,12 +1,17 @@
-<p align="center">
-    <h1 align="center">
-        RobotSeg:
-        <br>
-        A Model and Dataset for Segmenting Robots
-        <br>
-        in Image and Video
-    </h1>
-</p>
+<div align="center">
+  <h1>
+    RobotSeg:
+    <br>
+    A Model and Dataset for Segmenting Robots
+    <br>
+    in Image and Video
+  </h1>
+  <p>
+    <span style="font-size: 18px; font-weight: 700; color: #1e3a8a;">
+      CVPR 2026 Oral
+    </span>
+  </p>
+</div>
 
 <p align="center">
   <a href="https://mhaiyang.github.io/">Haiyang Mei</a>&nbsp;&nbsp;&nbsp;
@@ -50,8 +55,15 @@ We introduce **RobotSeg**, the first foundation model for robot segmentation tha
 [✨ 4. RobotSeg Model](#-4-robotseg-model)  
 [🏆 5. State-of-the-Art Performance](#-5-state-of-the-art-performance)  
 [🦾 6. Applications of RobotSeg](#-6-applications-of-robotseg)  
-[🙌 7. Acknowledgments](#-7-acknowledgments)  
-[📚 8. Citation](#-8-citation)
+[🛠️ 7. Getting Started](#-7-getting-started)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.1 Installation](#71-installation)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.2 Download](#72-download)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.3 Demo Use](#73-demo-use)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.4 Testing](#74-testing)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.5 Evaluation](#75-evaluation)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• [7.6 Training](#76-training)   
+[🙌 8. Acknowledgments](#-8-acknowledgments)  
+[📚 9. Citation](#-9-citation)
 
 
 ## 🚀 1. Introduction
@@ -185,12 +197,38 @@ RobotSeg provides accurate robot masks that can be used by modern 3D reconstruct
 <img src="assets/5_cropped.gif" width="700">
 </p>
 
-## 🙌 7. Acknowledgments
+## 🛠 7. Getting Started
+
+### 7.1 Installation
+In progress..
+
+### 7.2 Download
+
+- **Checkpoint**
+  - **robotseg.pt** [ [OneDrive](https://1drv.ms/u/c/f6d9d790b8550d3f/IQDc3mfIAQRETb7zmyhO-BG5AU-cIxzPnUwBDlsrCgcEQ3k?e=oT7NtR) ] [ [BaiduDisk](https://pan.baidu.com/s/1dkjD9YpFz4B2WcL2hkpUOA?pwd=cvpr) ]
+
+- **Dataset**
+  - **VRS** [ [OneDrive](https://1drv.ms/f/c/f6d9d790b8550d3f/IgCB128DB7eUQo9PDO8bkfSxAau1flNmBRe3441a5IyKkGg?e=mG6e3j) ] [ [BaiduDisk](https://pan.baidu.com/s/1_gfWG3et-PRwFoYX5gWxLw?pwd=cvpr) ]
+  - **RoboEngine** [ [OneDrive](https://1drv.ms/f/c/f6d9d790b8550d3f/IgBvL5Z6xy0ORKly5Ec_z560AW24QmVB9wx2BTH-DwkObP0?e=UN1ULn) ] [ [BaiduDisk](https://pan.baidu.com/s/1kBPEwGldD_Nf5o47VqTtKg?pwd=robo) ] (Reorganized from the original RoboEngine dataset with a unified folder structure for easier use. If you use it, remember to cite the [RoboEngine](https://github.com/michaelyuancb/roboengine) paper.)
+
+### 7.3 Demo Use
+In progress..
+
+### 7.4 Testing
+In progress..
+
+### 7.5 Evaluation
+In progress..
+
+### 7.6 Training
+In progress..
+
+## 🙌 8. Acknowledgments
 
 RobotSeg is built upon [SAM 2](https://github.com/facebookresearch/sam2).
 
 
-## 📚 8. Citation
+## 📚 9. Citation
 If you find our work useful, please consider citing our paper:
 ```
 @article{mei2025robotseg,

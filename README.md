@@ -241,7 +241,9 @@ sh infer_interactive.sh
 ```
 
 ### 7.5 Evaluation
-In progress..
+```
+sh eval.sh
+```
 
 ### 7.6 Training
 In progress..

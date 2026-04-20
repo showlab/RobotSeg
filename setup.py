@@ -23,7 +23,7 @@ REQUIRED_PACKAGES = [
     "hydra-core>=1.3.2",
     "iopath>=0.1.10",
     "pillow>=9.4.0",
-    "kornia"
+    "kornia",
 ]
 
 EXTRA_PACKAGES = {
@@ -49,6 +49,7 @@ EXTRA_PACKAGES = {
         "tensordict>=0.6.0",
         "opencv-contrib-python-headless==4.11.0.86",
         "submitit>=1.5.1",
+        "pycocoevalcap",
     ],
 }
 

@@ -231,6 +231,7 @@ python tools/save_gt_mask_multiprocess.py
 
 (b) Auto / Semi inference
 ```
+cd test
 sh infer_auto_semi.sh
 ```
 

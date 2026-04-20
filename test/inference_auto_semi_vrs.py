@@ -25,10 +25,8 @@ dataset_dir = sorted([
     if os.path.isdir(os.path.join(dataset_image_path, d)) and not d.startswith('.')
 ])
 
-
 def _save_mask(path_, mask_np_):
     cv2.imwrite(path_, mask_np_)
-
 
 def guided_refine_mask(mask, image,
                        small_radius=3,
@@ -110,7 +108,6 @@ def guided_refine_mask(mask, image,
             return mask_uint8
 
     return final_mask
-
 
 def process_sequences(args_settings, gpu_id, seq_list):
 
@@ -213,7 +210,8 @@ def process_sequences(args_settings, gpu_id, seq_list):
                     input_labels = torch.tensor([[1]], dtype=torch.int32)
 
                     frame_idx, object_ids, masks = predictor.add_new_points_or_box(inference_state=state,
-                                                                                   frame_idx=start_idx, obj_id=0,
+                                                                                   frame_idx=start_idx,
+                                                                                   obj_id=0,
                                                                                    points=input_points,
                                                                                    labels=input_labels,
                                                                                    robots=category,
@@ -360,7 +358,6 @@ def process_sequences(args_settings, gpu_id, seq_list):
         avg_ms = total_infer_time / total_infer_frames
         print(f"[GPU {gpu_id}] Avg Inference Speed: {avg_ms:.1f} ms/frame over {total_infer_frames} frames.")
 
-
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument(
@@ -424,4 +421,3 @@ if __name__ == '__main__':
         p.join()
 
     print(f"Finished VRSTest {args_settings.ckpt}_{args_settings.input}_{args_settings.category}.\nSaved results in {args_settings.save_dir_name}.")
-

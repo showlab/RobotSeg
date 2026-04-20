@@ -220,7 +220,24 @@ python setup.py build_ext --inplace
 In progress..
 
 ### 7.4 Testing
-In progress..
+
+(a) Prepare `mask_gt_info`
+
+_If you test on the VRS or RoboEngine dataset, you can **skip** this step, since the required `mask_gt_info` is already included in the released dataset and can be used directly. This step is mainly needed when testing on your own custom dataset._
+
+```
+python tools/save_gt_mask_multiprocess.py
+```
+
+(b) Auto / Semi inference
+```
+sh infer_auto_semi.sh
+```
+
+(c) Interactive inference
+```
+sh infer_interactive.sh
+```
 
 ### 7.5 Evaluation
 In progress..

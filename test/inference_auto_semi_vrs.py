@@ -320,7 +320,7 @@ def process_sequences(args_settings, gpu_id, seq_list):
                 torch.cuda.synchronize()
                 start_t = time.time()
 
-                # for out_frame_idx, out_obj_ids, out_mask_logits in predictor.propagate_in_video(inference_state=state):  # this is for SAM2.1
+                # for out_frame_idx, out_obj_ids, out_mask_logits in predictor.propagate_in_video(inference_state=state):  # this is for SAM2.1; also need to remove robots=category in predictor.add_new_points_or_box if testing SAM2.1
                 for out_frame_idx, out_obj_ids, out_mask_logits in predictor.propagate_in_video(inference_state=state, robot=category):  # this is for RobotSeg
 
                     video_segments[out_frame_idx] = {

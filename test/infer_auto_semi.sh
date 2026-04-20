@@ -16,7 +16,7 @@ input="auto"
 #save_dir_name="sam2.1"
 ## robotseg
 ckpt="robotseg"
-yaml="robotseg-infer.yaml"
+yaml="robotseg-infer"
 save_dir_name="robotseg"
 
 #### VRS dataset

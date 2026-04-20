@@ -1,0 +1,426 @@
+# -*- coding: utf-8 -*-
+# @FileName: inference_auto_semi_vrs.py
+# @Time    : 22/9/25 19:54
+# @Author  : Haiyang Mei
+# @E-mail  : haiyang.mei@outlook.com
+
+import time
+import cv2
+import numpy as np
+from glob import glob
+from argparse import ArgumentParser
+from concurrent.futures import ThreadPoolExecutor
+import multiprocessing as mp
+from scipy.ndimage import label
+from utils import *
+from natsort import natsorted
+import os
+
+dataset_image_path = '/workspace/RobotSeg/dataset/VRS/test/image'
+dataset_anno_path = '/workspace/RobotSeg/dataset/VRS/test/mask_gt'
+dataset_gt_path = '/workspace/RobotSeg/dataset/VRS/test/mask_gt_info'
+
+dataset_dir = sorted([
+    d for d in os.listdir(dataset_image_path)
+    if os.path.isdir(os.path.join(dataset_image_path, d)) and not d.startswith('.')
+])
+
+
+def _save_mask(path_, mask_np_):
+    cv2.imwrite(path_, mask_np_)
+
+
+def guided_refine_mask(mask, image,
+                       small_radius=3,
+                       large_radius=7,
+                       eps=1e-3,
+                       band_width=3,
+                       thick_thresh=6.0,
+                       area_change_thresh=0.03
+                       ):
+    """Boundary-only adaptive guided refinement.
+
+    Strategy:
+        1) Only refine pixels in a narrow boundary band.
+        2) Run guided filter with two radii (small / large).
+        3) Use local thickness to blend them:
+           - thin regions -> prefer small radius
+           - thick regions -> prefer large radius
+        4) Fallback to original mask if area changes too much.
+    """
+    if image is None:
+        return mask.astype(np.uint8)
+
+    mask_uint8 = mask.astype(np.uint8)
+    if mask_uint8.max() <= 1:
+        mask_uint8 = mask_uint8 * 255
+
+    # Empty mask: nothing to refine
+    if np.count_nonzero(mask_uint8) == 0:
+        return mask_uint8
+
+    # Guide image
+    guide = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY).astype(np.float32) / 255.0
+    src = mask_uint8.astype(np.float32) / 255.0
+
+    # Two guided-filter results
+    refined_small = cv2.ximgproc.guidedFilter(
+        guide=guide, src=src, radius=small_radius, eps=eps
+    )
+    refined_large = cv2.ximgproc.guidedFilter(
+        guide=guide, src=src, radius=large_radius, eps=eps
+    )
+
+    # Build boundary band from original mask
+    k = 2 * band_width + 1
+    kernel = np.ones((k, k), np.uint8)
+    dilated = cv2.dilate(mask_uint8, kernel, iterations=1)
+    eroded = cv2.erode(mask_uint8, kernel, iterations=1)
+    boundary_band = cv2.subtract(dilated, eroded) > 0
+
+    # Estimate local thickness:
+    # distance transform itself is small on boundary, so use local maximum
+    # around each pixel to reflect whether this boundary belongs to a thick part.
+    binary_fg = (mask_uint8 > 0).astype(np.uint8)
+    dist_map = cv2.distanceTransform(binary_fg, cv2.DIST_L2, 5)
+
+    # Local max thickness around each pixel
+    local_ksize = max(3, 2 * large_radius + 1)
+    local_thickness = cv2.dilate(
+        dist_map, np.ones((local_ksize, local_ksize), np.uint8), iterations=1
+    )
+
+    # Blend weight: 0 -> small radius, 1 -> large radius
+    # local_thickness >= thick_thresh means "thick region"
+    alpha = np.clip((local_thickness - 2.0) / max(thick_thresh - 2.0, 1e-6), 0.0, 1.0)
+
+    refined_soft = (1.0 - alpha) * refined_small + alpha * refined_large
+    refined_bin = (refined_soft > 0.5).astype(np.uint8) * 255
+
+    # Only replace boundary band; keep confident interior/exterior unchanged
+    final_mask = mask_uint8.copy()
+    final_mask[boundary_band] = refined_bin[boundary_band]
+
+    # Safety check: if area changes too much, keep original
+    orig_area = np.count_nonzero(mask_uint8)
+    new_area = np.count_nonzero(final_mask)
+    if orig_area > 0:
+        rel_change = abs(new_area - orig_area) / float(orig_area)
+        if rel_change > area_change_thresh:
+            return mask_uint8
+
+    return final_mask
+
+
+def process_sequences(args_settings, gpu_id, seq_list):
+
+    save_pool = ThreadPoolExecutor(max_workers=8)
+
+    # === record inference time ===
+    total_infer_time = 0.0
+    total_infer_frames = 0
+
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
+    import torch
+    torch.cuda.set_device(0)
+    torch.set_num_threads(1)
+    os.environ["OMP_NUM_THREADS"] = "1"
+
+    from robotseg.build_robotseg import build_robotseg_video_predictor
+
+    category = args_settings.category
+    input = args_settings.input
+    ckpt = args_settings.ckpt
+    yaml = args_settings.yaml
+    save_dir_name = args_settings.save_dir_name
+    guided_filter = args_settings.guided_filter
+
+    model_cfg = f"../robotseg/configs/{yaml}"
+    checkpoint = f"../checkpoints/{ckpt}.pt"
+    save_path = f"./output_auto_semi/{save_dir_name}/Auto_Semi_VRSTest_{ckpt}_{input}"
+
+    predictor = build_robotseg_video_predictor(model_cfg, checkpoint)
+
+    category2id = {"arm": "000", "gripper": "001", "robot": "002"}
+    instance_id = category2id.get(category.lower(), None)
+    if instance_id is None:
+        raise ValueError(f"Unknown category: {category}")
+
+    for n_video, seq_name in enumerate(tqdm(seq_list, desc=f"GPU {gpu_id}: ")):
+
+        seq_path = os.path.join(dataset_image_path, seq_name)
+        frame_name = natsorted(os.listdir(seq_path))
+        frame_name = [ i.split('.')[0] for i in frame_name]
+        num_frames = len(frame_name)
+
+        gt_mask_path = os.path.join(dataset_gt_path, seq_name)
+        instance_list = [f"{instance_id}.npy"]  # only process the selected instance
+
+        with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
+            for save_id in instance_list:
+                save_id = save_id.split('.')[0]
+
+                instance_save_path = os.path.join(save_path, seq_name, save_id)
+                if os.path.exists(instance_save_path) and len(os.listdir(instance_save_path)) != 0:
+                    continue
+                else:
+                    os.makedirs(instance_save_path, exist_ok=True)
+
+                state = predictor.init_state(
+                    video_path=seq_path,
+                    async_loading_frames=False,
+                    offload_video_to_cpu=False,
+                    offload_state_to_cpu=False,
+                )
+                anno_point_record = []
+                gt_mask = np.load(os.path.join(gt_mask_path, save_id + '.npy'), allow_pickle=True).item()
+                gt_mask = check_mask(gt_mask)
+
+                start_idx = 0
+                for k, v in gt_mask.items():
+                    if v[0].any():
+                        start_idx = k
+                        break
+
+                for idx in range(num_frames):
+                    if idx not in gt_mask.keys():
+                        gt_mask[idx] = {}
+                        gt_mask[idx][0] = np.zeros_like(gt_mask[start_idx][0])
+
+                # (a) automatic segmentation without any manual prompt
+                if input == "auto":
+                    frame_idx, object_ids, masks = predictor.add_new_robot(inference_state=state, frame_idx=start_idx,
+                                                                           obj_id=0,
+                                                                           robot=category,
+                                                                           )
+
+                    video_segments = {}
+                    video_segments[0] = {out_obj_id: (masks[i] > 0.0).cpu().numpy() for i, out_obj_id in enumerate(object_ids)}
+
+                    frame_iou = cal_maskIoU(video_segments[0][0], gt_mask[start_idx][0])
+
+                # (b) 1-click prompt
+                elif input == "1c":
+
+                    interact_points, gt_state = select_interact_point_center2(gt_mask[start_idx][0])
+
+                    anno_point_record.append(interact_points['0'])
+
+                    point = interact_points['0']
+                    video_segments = {}
+
+                    input_points = torch.tensor(point.astype(np.float32)).unsqueeze(0).unsqueeze(0)
+                    input_labels = torch.tensor([[1]], dtype=torch.int32)
+
+                    frame_idx, object_ids, masks = predictor.add_new_points_or_box(inference_state=state,
+                                                                                   frame_idx=start_idx, obj_id=0,
+                                                                                   points=input_points,
+                                                                                   labels=input_labels,
+                                                                                   robots=category,
+                                                                                   )
+
+                    video_segments[0] = {
+                        out_obj_id: (masks[i] > 0.0).cpu().numpy()
+                        for i, out_obj_id in enumerate(object_ids)
+                    }
+
+                    frame_iou = cal_maskIoU(video_segments[0][0], gt_mask[start_idx][0])
+
+                # (c) 3-click prompt
+                elif input == "3c":
+
+                    num_click = 3
+
+                    interact_points, gt_state = select_interact_point_center2(gt_mask[start_idx][0])
+
+                    anno_point_record.append(interact_points['0'])
+
+                    prompt_iou = []
+                    point = interact_points['0']
+                    video_segments = {}
+
+                    input_points = torch.tensor(point.astype(np.float32)).unsqueeze(0).unsqueeze(0)
+                    input_labels = torch.tensor([[1]], dtype=torch.int32)
+
+                    frame_idx, object_ids, masks = predictor.add_new_points_or_box(inference_state=state,
+                                                                                   frame_idx=start_idx, obj_id=0,
+                                                                                   points=input_points,
+                                                                                   labels=input_labels,
+                                                                                   robots=category,
+                                                                                   )
+
+                    video_segments[0] = {
+                        out_obj_id: (masks[i] > 0.0).cpu().numpy()
+                        for i, out_obj_id in enumerate(object_ids)
+                    }
+
+                    frame_iou = cal_maskIoU(video_segments[0][0], gt_mask[start_idx][0])
+
+                    prompt_iou.append(frame_iou.item())
+
+                    for i in range(num_click - 1):
+                        point, label = get_next_point(torch.tensor(gt_mask[start_idx][0]).unsqueeze(0).unsqueeze(0),
+                                                      torch.tensor(video_segments[0][0]).unsqueeze(0), 'center')
+
+                        anno_point_record.append(np.array(point[0][0]))
+
+                        input_points = torch.cat((input_points, point), dim=1)
+                        input_labels = torch.cat((input_labels, label), dim=1)
+
+                        frame_idx, object_ids, masks = predictor.add_new_points_or_box(inference_state=state,
+                                                                                       frame_idx=start_idx, obj_id=0,
+                                                                                       points=input_points,
+                                                                                       labels=input_labels,
+                                                                                       robots=category,
+                                                                                       )
+                        video_segments = {}
+                        video_segments[0] = {out_obj_id: (masks[i] > 0.0).cpu().numpy() for i, out_obj_id in enumerate(object_ids)}
+
+                        frame_iou = cal_maskIoU(video_segments[0][0], gt_mask[start_idx][0])
+                        prompt_iou.append(frame_iou.item())
+
+                    max_idx = np.argmax(prompt_iou).item()
+                    input_points = input_points[:, :max_idx + 1, :]
+                    input_labels = input_labels[:, :max_idx + 1]
+                    frame_idx, object_ids, masks = predictor.add_new_points_or_box(inference_state=state,
+                                                                                   frame_idx=start_idx, obj_id=0,
+                                                                                   points=input_points,
+                                                                                   labels=input_labels,
+                                                                                   robots=category,
+                                                                                   )
+
+                # (d) bounding-box prompt
+                elif input == "bb":
+                    binary_image = np.uint8(gt_mask[start_idx][0]) * 255
+                    contours, _ = cv2.findContours(binary_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                    all_points = np.concatenate([contour for contour in contours])
+
+                    x, y, w, h = cv2.boundingRect(all_points)
+                    box = np.array([x, y, x + w, y + h], dtype=np.float32)
+
+                    frame_idx, object_ids, masks = predictor.add_new_points_or_box(inference_state=state,
+                                                                                   frame_idx=start_idx, obj_id=0,
+                                                                                   box=box,
+                                                                                   robots=category,
+                                                                                   )
+                    video_segments = {}
+                    video_segments[0] = {out_obj_id: (masks[i] > 0.0).cpu().numpy() for i, out_obj_id in enumerate(object_ids)}
+
+                    frame_iou = cal_maskIoU(video_segments[0][0], gt_mask[start_idx][0])
+
+                # (e) other prompt
+                else:
+                    raise NotImplementedError
+
+                # propagate in video
+                gpu_masks = []
+                frame_indices = []
+
+                # === record time ===
+                torch.cuda.synchronize()
+                start_t = time.time()
+
+                # for out_frame_idx, out_obj_ids, out_mask_logits in predictor.propagate_in_video(inference_state=state):  # this is for SAM2.1
+                for out_frame_idx, out_obj_ids, out_mask_logits in predictor.propagate_in_video(inference_state=state, robot=category):  # this is for RobotSeg
+
+                    video_segments[out_frame_idx] = {
+                        out_obj_id: (out_mask_logits[i] > 0.0)
+                        for i, out_obj_id in enumerate(out_obj_ids)
+                    }
+                    gpu_masks.append(video_segments[out_frame_idx][0][0])  # CUDA Tensor
+                    frame_indices.append(out_frame_idx)
+
+                torch.cuda.synchronize()
+                end_t = time.time()
+                elapsed_ms = (end_t - start_t) * 1000.0
+
+                num_frames = len(frame_indices)
+                if num_frames > 0:
+                    total_infer_time += elapsed_ms
+                    total_infer_frames += num_frames
+
+                stacked_np = (torch.stack(gpu_masks, 0).cpu().numpy() * 255.).astype(np.uint8)
+
+                for i, idx in enumerate(frame_indices):
+                    save_path_png = os.path.join(instance_save_path, frame_name[idx] + '.png')
+                    mask_to_save = stacked_np[i]
+                    if guided_filter and i != 0:
+                        image_path = os.path.join(seq_path, frame_name[idx] + '.jpg')
+                        image = cv2.imread(image_path)
+                        if image is not None:
+                            mask_to_save = guided_refine_mask(mask_to_save, image)
+                        else:
+                            print(f"{image_path}: image not found or failed to read, skip guided refine.")
+
+                    save_pool.submit(_save_mask, save_path_png, mask_to_save)
+
+    save_pool.shutdown(wait=True)
+
+    if total_infer_frames > 0:
+        avg_ms = total_infer_time / total_infer_frames
+        print(f"[GPU {gpu_id}] Avg Inference Speed: {avg_ms:.1f} ms/frame over {total_infer_frames} frames.")
+
+
+if __name__ == '__main__':
+    parser = ArgumentParser()
+    parser.add_argument(
+        "--category",
+        required=True,
+        type=str,
+    )
+    parser.add_argument(
+        "--input",
+        required=True,
+        type=str,
+    )
+    parser.add_argument(
+        "--ckpt",
+        required=True,
+        type=str,
+    )
+    parser.add_argument(
+        "--yaml",
+        required=True,
+        type=str,
+    )
+    parser.add_argument(
+        "--save_dir_name",
+        required=True,
+        type=str,
+    )
+    parser.add_argument(
+        "--guided_filter",
+        type=lambda x: str(x).lower() in ["true", "1", "yes"],
+        default=True,
+    )
+    args_settings = parser.parse_args()
+
+    mp.set_start_method('spawn')
+
+    cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES", "")
+    available_gpu_ids = [int(x) for x in cuda_visible_devices.split(",") if x.strip() != ""]
+    print(available_gpu_ids)
+
+    gpu_sequences = [[] for _ in available_gpu_ids]
+    for idx, seq_name in enumerate(dataset_dir):
+        gpu_sequences[idx % len(available_gpu_ids)].append(seq_name)
+
+    print(f"Start VRSTest {args_settings.ckpt}_{args_settings.input}_{args_settings.category}...")
+
+    processes = []
+    for x, gpu_id in enumerate(available_gpu_ids):
+        seq_list = gpu_sequences[x]
+        if not seq_list:
+            continue
+
+        p = mp.Process(
+            target=process_sequences,
+            args=(args_settings, gpu_id, seq_list)
+        )
+        p.start()
+        processes.append(p)
+
+    for p in processes:
+        p.join()
+
+    print(f"Finished VRSTest {args_settings.ckpt}_{args_settings.input}_{args_settings.category}.\nSaved results in {args_settings.save_dir_name}.")

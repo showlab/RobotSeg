@@ -242,7 +242,8 @@ sh infer_interactive.sh
 
 ### 7.5 Evaluation
 ```
-sh eval.sh
+sh eval_auto_semi.sh
+sh eval_interactive.sh
 ```
 
 ### 7.6 Training

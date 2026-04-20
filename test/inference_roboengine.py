@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-# @FileName: inference_auto_semi_vrs.py
-# @Time    : 22/9/25 19:54
+# @FileName: inference_roboengine.py
+# @Time    : 22/9/25 20:59
 # @Author  : Haiyang Mei
 # @E-mail  : haiyang.mei@outlook.com
 
-import time
 import cv2
-import numpy as np
 from glob import glob
 from argparse import ArgumentParser
 from concurrent.futures import ThreadPoolExecutor
@@ -16,9 +14,9 @@ from utils import *
 from natsort import natsorted
 import os
 
-dataset_image_path = '/workspace/RobotSeg/dataset/VRS/test/image'
-dataset_anno_path = '/workspace/RobotSeg/dataset/VRS/test/mask_gt'
-dataset_gt_path = '/workspace/RobotSeg/dataset/VRS/test/mask_gt_info'
+dataset_image_path = '/workspace/RobotSeg/dataset/RoboEngine/test/image'
+dataset_anno_path = '/workspace/RobotSeg/dataset/RoboEngine/test/mask'
+dataset_gt_path = '/workspace/RobotSeg/dataset/RoboEngine/test/mask_info'
 
 dataset_dir = sorted([
     d for d in os.listdir(dataset_image_path)
@@ -28,94 +26,9 @@ dataset_dir = sorted([
 def _save_mask(path_, mask_np_):
     cv2.imwrite(path_, mask_np_)
 
-def guided_refine_mask(mask, image,
-                       small_radius=3,
-                       large_radius=7,
-                       eps=1e-3,
-                       band_width=3,
-                       thick_thresh=6.0,
-                       area_change_thresh=0.03
-                       ):
-    """Boundary-only adaptive guided refinement.
-
-    Strategy:
-        1) Only refine pixels in a narrow boundary band.
-        2) Run guided filter with two radii (small / large).
-        3) Use local thickness to blend them:
-           - thin regions -> prefer small radius
-           - thick regions -> prefer large radius
-        4) Fallback to original mask if area changes too much.
-    """
-    if image is None:
-        return mask.astype(np.uint8)
-
-    mask_uint8 = mask.astype(np.uint8)
-    if mask_uint8.max() <= 1:
-        mask_uint8 = mask_uint8 * 255
-
-    # Empty mask: nothing to refine
-    if np.count_nonzero(mask_uint8) == 0:
-        return mask_uint8
-
-    # Guide image
-    guide = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY).astype(np.float32) / 255.0
-    src = mask_uint8.astype(np.float32) / 255.0
-
-    # Two guided-filter results
-    refined_small = cv2.ximgproc.guidedFilter(
-        guide=guide, src=src, radius=small_radius, eps=eps
-    )
-    refined_large = cv2.ximgproc.guidedFilter(
-        guide=guide, src=src, radius=large_radius, eps=eps
-    )
-
-    # Build boundary band from original mask
-    k = 2 * band_width + 1
-    kernel = np.ones((k, k), np.uint8)
-    dilated = cv2.dilate(mask_uint8, kernel, iterations=1)
-    eroded = cv2.erode(mask_uint8, kernel, iterations=1)
-    boundary_band = cv2.subtract(dilated, eroded) > 0
-
-    # Estimate local thickness:
-    # distance transform itself is small on boundary, so use local maximum
-    # around each pixel to reflect whether this boundary belongs to a thick part.
-    binary_fg = (mask_uint8 > 0).astype(np.uint8)
-    dist_map = cv2.distanceTransform(binary_fg, cv2.DIST_L2, 5)
-
-    # Local max thickness around each pixel
-    local_ksize = max(3, 2 * large_radius + 1)
-    local_thickness = cv2.dilate(
-        dist_map, np.ones((local_ksize, local_ksize), np.uint8), iterations=1
-    )
-
-    # Blend weight: 0 -> small radius, 1 -> large radius
-    # local_thickness >= thick_thresh means "thick region"
-    alpha = np.clip((local_thickness - 2.0) / max(thick_thresh - 2.0, 1e-6), 0.0, 1.0)
-
-    refined_soft = (1.0 - alpha) * refined_small + alpha * refined_large
-    refined_bin = (refined_soft > 0.5).astype(np.uint8) * 255
-
-    # Only replace boundary band; keep confident interior/exterior unchanged
-    final_mask = mask_uint8.copy()
-    final_mask[boundary_band] = refined_bin[boundary_band]
-
-    # Safety check: if area changes too much, keep original
-    orig_area = np.count_nonzero(mask_uint8)
-    new_area = np.count_nonzero(final_mask)
-    if orig_area > 0:
-        rel_change = abs(new_area - orig_area) / float(orig_area)
-        if rel_change > area_change_thresh:
-            return mask_uint8
-
-    return final_mask
-
 def process_sequences(args_settings, gpu_id, seq_list):
 
     save_pool = ThreadPoolExecutor(max_workers=8)
-
-    # === record inference time ===
-    total_infer_time = 0.0
-    total_infer_frames = 0
 
     os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
     import torch
@@ -130,18 +43,12 @@ def process_sequences(args_settings, gpu_id, seq_list):
     ckpt = args_settings.ckpt
     yaml = args_settings.yaml
     save_dir_name = args_settings.save_dir_name
-    guided_filter = args_settings.guided_filter
 
     model_cfg = f"../robotseg/configs/{yaml}"
     checkpoint = f"../checkpoints/{ckpt}.pt"
-    save_path = f"./output_auto_semi/{save_dir_name}/Auto_Semi_VRSTest_{ckpt}_{input}"
+    save_path = f"./output_auto_semi/{save_dir_name}/RoboEngineTest_{ckpt}_{input}"
 
     predictor = build_robotseg_video_predictor(model_cfg, checkpoint)
-
-    category2id = {"arm": "000", "gripper": "001", "robot": "002"}
-    instance_id = category2id.get(category.lower(), None)
-    if instance_id is None:
-        raise ValueError(f"Unknown category: {category}")
 
     for n_video, seq_name in enumerate(tqdm(seq_list, desc=f"GPU {gpu_id}: ")):
 
@@ -151,7 +58,7 @@ def process_sequences(args_settings, gpu_id, seq_list):
         num_frames = len(frame_name)
 
         gt_mask_path = os.path.join(dataset_gt_path, seq_name)
-        instance_list = [f"{instance_id}.npy"]  # only process the selected instance
+        instance_list = natsorted(os.listdir(gt_mask_path))  # only 002.npy
 
         with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
             for save_id in instance_list:
@@ -189,7 +96,7 @@ def process_sequences(args_settings, gpu_id, seq_list):
                     frame_idx, object_ids, masks = predictor.add_new_robot(inference_state=state,
                                                                            frame_idx=start_idx,
                                                                            obj_id=0,
-                                                                           robot=category,
+                                                                           robot=category
                                                                            )
 
                     video_segments = {}
@@ -318,14 +225,7 @@ def process_sequences(args_settings, gpu_id, seq_list):
                 # propagate in video
                 gpu_masks = []
                 frame_indices = []
-
-                # === record time ===
-                torch.cuda.synchronize()
-                start_t = time.time()
-
-                # for out_frame_idx, out_obj_ids, out_mask_logits in predictor.propagate_in_video(inference_state=state):  # this is for SAM2.1; also need to remove robots=category in predictor.add_new_points_or_box if testing SAM2.1
-                for out_frame_idx, out_obj_ids, out_mask_logits in predictor.propagate_in_video(inference_state=state, robot=category):  # this is for RobotSeg
-
+                for out_frame_idx, out_obj_ids, out_mask_logits in predictor.propagate_in_video(inference_state=state, robot=category):
                     video_segments[out_frame_idx] = {
                         out_obj_id: (out_mask_logits[i] > 0.0)
                         for i, out_obj_id in enumerate(out_obj_ids)
@@ -333,35 +233,14 @@ def process_sequences(args_settings, gpu_id, seq_list):
                     gpu_masks.append(video_segments[out_frame_idx][0][0])  # CUDA Tensor
                     frame_indices.append(out_frame_idx)
 
-                torch.cuda.synchronize()
-                end_t = time.time()
-                elapsed_ms = (end_t - start_t) * 1000.0
-
-                num_frames = len(frame_indices)
-                if num_frames > 0:
-                    total_infer_time += elapsed_ms
-                    total_infer_frames += num_frames
-
                 stacked_np = (torch.stack(gpu_masks, 0).cpu().numpy() * 255.).astype(np.uint8)
 
                 for i, idx in enumerate(frame_indices):
                     save_path_png = os.path.join(instance_save_path, frame_name[idx] + '.png')
                     mask_to_save = stacked_np[i]
-                    if guided_filter and i != 0:
-                        image_path = os.path.join(seq_path, frame_name[idx] + '.jpg')
-                        image = cv2.imread(image_path)
-                        if image is not None:
-                            mask_to_save = guided_refine_mask(mask_to_save, image)
-                        else:
-                            print(f"{image_path}: image not found or failed to read, skip guided refine.")
-
                     save_pool.submit(_save_mask, save_path_png, mask_to_save)
 
     save_pool.shutdown(wait=True)
-
-    if total_infer_frames > 0:
-        avg_ms = total_infer_time / total_infer_frames
-        print(f"[GPU {gpu_id}] Avg Inference Speed: {avg_ms:.1f} ms/frame over {total_infer_frames} frames.")
 
 if __name__ == '__main__':
     parser = ArgumentParser()
@@ -390,11 +269,6 @@ if __name__ == '__main__':
         required=True,
         type=str,
     )
-    parser.add_argument(
-        "--guided_filter",
-        type=lambda x: str(x).lower() in ["true", "1", "yes"],
-        default=True,
-    )
     args_settings = parser.parse_args()
 
     mp.set_start_method('spawn')
@@ -407,7 +281,7 @@ if __name__ == '__main__':
     for idx, seq_name in enumerate(dataset_dir):
         gpu_sequences[idx % len(available_gpu_ids)].append(seq_name)
 
-    print(f"Start VRSTest {args_settings.ckpt}_{args_settings.input}_{args_settings.category}...")
+    print(f"Start RoboEngineTest {args_settings.ckpt}_{args_settings.input}...")
 
     processes = []
     for x, gpu_id in enumerate(available_gpu_ids):
@@ -425,4 +299,4 @@ if __name__ == '__main__':
     for p in processes:
         p.join()
 
-    print(f"Finished VRSTest {args_settings.ckpt}_{args_settings.input}_{args_settings.category}.\nSaved results in {args_settings.save_dir_name}.")
+    print(f"Finished RoboEngineTest {args_settings.ckpt}_{args_settings.input}.\nSaved results in {args_settings.save_dir_name}.")

@@ -198,7 +198,14 @@ RobotSeg provides accurate robot masks that can be used by modern 3D reconstruct
 ## 🛠 7. Getting Started
 
 ### 7.1 Installation
-In progress..
+Our implementation uses `python==3.11`, `torch==2.5.1` and `torchvision==0.20.1`. You can install RobotSeg on a GPU machine using:
+```
+conda create -n robotseg python=3.11
+conda activate robotseg
+pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu121
+pip install -e ".[dev]"
+python setup.py build_ext --inplace
+```
 
 ### 7.2 Download
 

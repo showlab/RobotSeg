@@ -2,9 +2,9 @@ import os
 from setuptools import find_packages, setup
 
 # Package metadata
-NAME = "VRS"
+NAME = "robotseg"
 VERSION = "1.0"
-DESCRIPTION = "VRS: Video Robot Segmentation"
+DESCRIPTION = "RobotSeg: Robot Segmentation in Image and Video"
 URL = "https://github.com/showlab/RobotSeg"
 AUTHOR = "Haiyang Mei"
 AUTHOR_EMAIL = "haiyang.mei@outlook.com"
@@ -53,19 +53,19 @@ EXTRA_PACKAGES = {
 }
 
 # By default, we also build the CUDA extension.
-# You may turn off CUDA build with `export VRS_BUILD_CUDA=0`.
-BUILD_CUDA = os.getenv("VRS_BUILD_CUDA", "1") == "1"
+# You may turn off CUDA build with `export ROBOTSEG_BUILD_CUDA=0`.
+BUILD_CUDA = os.getenv("ROBOTSEG_BUILD_CUDA", "1") == "1"
 # By default, we allow installation to proceed even with build errors.
-# You may force stopping on errors with `export VRS_BUILD_ALLOW_ERRORS=0`.
-BUILD_ALLOW_ERRORS = os.getenv("VRS_BUILD_ALLOW_ERRORS", "1") == "1"
+# You may force stopping on errors with `export ROBOTSEG_BUILD_ALLOW_ERRORS=0`.
+BUILD_ALLOW_ERRORS = os.getenv("ROBOTSEG_BUILD_ALLOW_ERRORS", "1") == "1"
 
 # Catch and skip errors during extension building and print a warning message
 # (note that this message only shows up under verbose build mode
 # "pip install -v -e ." or "python setup.py build_ext -v")
 CUDA_ERROR_MSG = (
     "{}\n\n"
-    "Failed to build the VRS CUDA extension due to the error above. "
-    "You can still use VRS and it's OK to ignore the error above, although some "
+    "Failed to build the robotseg CUDA extension due to the error above. "
+    "You can still use robotseg and it's OK to ignore the error above, although some "
     "post-processing functionality may be limited (which doesn't affect the results in most cases).\n"
 )
 
@@ -77,7 +77,7 @@ def get_extensions():
     try:
         from torch.utils.cpp_extension import CUDAExtension
 
-        srcs = ["vrs/csrc/connected_components.cu"]
+        srcs = ["robotseg/csrc/connected_components.cu"]
         compile_args = {
             "cxx": [],
             "nvcc": [
@@ -87,7 +87,7 @@ def get_extensions():
                 "-D__CUDA_NO_HALF2_OPERATORS__",
             ],
         }
-        ext_modules = [CUDAExtension("vrs._C", srcs, extra_compile_args=compile_args)]
+        ext_modules = [CUDAExtension("robotseg._C", srcs, extra_compile_args=compile_args)]
     except Exception as e:
         if BUILD_ALLOW_ERRORS:
             print(CUDA_ERROR_MSG.format(e))

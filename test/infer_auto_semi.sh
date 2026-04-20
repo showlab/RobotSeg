@@ -27,7 +27,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python inference_auto_semi_vrs.py \
 --yaml ${yaml} \
 --save_dir_name ${save_dir_name}
 
-#### RoboEngine dataset (only supports `category="robot"` because the dataset contains only whole-robot masks)
+#### RoboEngine dataset (only supports category="robot" because the dataset contains only whole-robot masks)
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python inference_roboengine.py \
 --category ${category} \
 --input ${input} \

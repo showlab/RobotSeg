@@ -424,3 +424,4 @@ if __name__ == '__main__':
         p.join()
 
     print(f"Finished VRSTest {args_settings.ckpt}_{args_settings.input}_{args_settings.category}.\nSaved results in {args_settings.save_dir_name}.")
+

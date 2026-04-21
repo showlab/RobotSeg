@@ -5,7 +5,7 @@ from benchmark import benchmark
 The structure of the {GT_ROOT} can be either of the follow two structures.
 {GT_ROOT} and {PRED_ROOT} should be of the same format.
 
-1. RobotSeg test structure (same as SAM2's SAV test)
+1. VRS test structure (same as SAM2's SAV test)
     {GT_ROOT}  # gt root folder
         ├── {video_id}
         │     ├── 000               # all masks associated with obj 000
@@ -59,8 +59,7 @@ parser.add_argument(
 # https://github.com/davisvideochallenge/davis2017-evaluation/blob/d34fdef71ce3cb24c1a167d860b707e575b3034c/davis2017/evaluation.py#L85
 parser.add_argument(
     "--do_not_skip_first_and_last_frame",
-    help="We skip the first and the last annotated frames in evaluation."
-    "Set this to true for evaluation on settings that doesn't skip first and last frames.",
+    help="We don't skip the first and the last annotated frames in evaluation.",
     action="store_true",
 )
 parser.add_argument(

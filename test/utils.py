@@ -603,3 +603,26 @@ def guided_refine_mask(mask, image,
 
     return final_mask
 
+
+def overlay_mask_blue(image, mask):
+    """
+    Overlay mask on image using blue color.
+    image: H x W x 3, BGR
+    mask : H x W, uint8 in {0,255} or {0,1}
+    """
+    mask = (mask > 0).astype(np.uint8)
+
+    result = image.copy()
+    blue = np.zeros_like(image, dtype=np.uint8)
+    blue[:, :, 0] = 255  # BGR: blue channel
+
+    valid = mask == 1
+    result[valid] = cv2.addWeighted(
+        image[valid],
+        0.5,
+        blue[valid],
+        0.5,
+        0.0
+    )
+    return result
+

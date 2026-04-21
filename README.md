@@ -217,7 +217,10 @@ python setup.py build_ext --inplace
   - **RoboEngine** [ [OneDrive](https://1drv.ms/f/c/f6d9d790b8550d3f/IgBvL5Z6xy0ORKly5Ec_z560AW24QmVB9wx2BTH-DwkObP0?e=UN1ULn) ] [ [BaiduDisk](https://pan.baidu.com/s/1kBPEwGldD_Nf5o47VqTtKg?pwd=robo) ] (Reorganized from the original RoboEngine dataset with a unified folder structure for easier use. If you use it, remember to cite the [RoboEngine](https://github.com/michaelyuancb/roboengine) paper.)
 
 ### 7.3 Demo Use
-In progress..
+```
+cd test
+python demo.py
+```
 
 ### 7.4 Testing
 

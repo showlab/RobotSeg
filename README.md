@@ -250,7 +250,9 @@ sh eval_interactive.sh
 ```
 
 ### 7.6 Training
-In progress..
+```
+sh train.sh
+```
 
 ## 🙌 8. Acknowledgments
 

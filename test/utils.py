@@ -520,3 +520,86 @@ def mask2ploy(mask):
     state['ploy'] = ploy_instance
     state['color'] = color_instance
     return state
+
+
+def guided_refine_mask(mask, image,
+                       small_radius=3,
+                       large_radius=7,
+                       eps=1e-3,
+                       band_width=3,
+                       thick_thresh=6.0,
+                       area_change_thresh=0.03
+                       ):
+    """Boundary-only adaptive guided refinement.
+
+    Strategy:
+        1) Only refine pixels in a narrow boundary band.
+        2) Run guided filter with two radii (small / large).
+        3) Use local thickness to blend them:
+           - thin regions -> prefer small radius
+           - thick regions -> prefer large radius
+        4) Fallback to original mask if area changes too much.
+    """
+    if image is None:
+        return mask.astype(np.uint8)
+
+    mask_uint8 = mask.astype(np.uint8)
+    if mask_uint8.max() <= 1:
+        mask_uint8 = mask_uint8 * 255
+
+    # Empty mask: nothing to refine
+    if np.count_nonzero(mask_uint8) == 0:
+        return mask_uint8
+
+    # Guide image
+    guide = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY).astype(np.float32) / 255.0
+    src = mask_uint8.astype(np.float32) / 255.0
+
+    # Two guided-filter results
+    refined_small = cv2.ximgproc.guidedFilter(
+        guide=guide, src=src, radius=small_radius, eps=eps
+    )
+    refined_large = cv2.ximgproc.guidedFilter(
+        guide=guide, src=src, radius=large_radius, eps=eps
+    )
+
+    # Build boundary band from original mask
+    k = 2 * band_width + 1
+    kernel = np.ones((k, k), np.uint8)
+    dilated = cv2.dilate(mask_uint8, kernel, iterations=1)
+    eroded = cv2.erode(mask_uint8, kernel, iterations=1)
+    boundary_band = cv2.subtract(dilated, eroded) > 0
+
+    # Estimate local thickness:
+    # distance transform itself is small on boundary, so use local maximum
+    # around each pixel to reflect whether this boundary belongs to a thick part.
+    binary_fg = (mask_uint8 > 0).astype(np.uint8)
+    dist_map = cv2.distanceTransform(binary_fg, cv2.DIST_L2, 5)
+
+    # Local max thickness around each pixel
+    local_ksize = max(3, 2 * large_radius + 1)
+    local_thickness = cv2.dilate(
+        dist_map, np.ones((local_ksize, local_ksize), np.uint8), iterations=1
+    )
+
+    # Blend weight: 0 -> small radius, 1 -> large radius
+    # local_thickness >= thick_thresh means "thick region"
+    alpha = np.clip((local_thickness - 2.0) / max(thick_thresh - 2.0, 1e-6), 0.0, 1.0)
+
+    refined_soft = (1.0 - alpha) * refined_small + alpha * refined_large
+    refined_bin = (refined_soft > 0.5).astype(np.uint8) * 255
+
+    # Only replace boundary band; keep confident interior/exterior unchanged
+    final_mask = mask_uint8.copy()
+    final_mask[boundary_band] = refined_bin[boundary_band]
+
+    # Safety check: if area changes too much, keep original
+    orig_area = np.count_nonzero(mask_uint8)
+    new_area = np.count_nonzero(final_mask)
+    if orig_area > 0:
+        rel_change = abs(new_area - orig_area) / float(orig_area)
+        if rel_change > area_change_thresh:
+            return mask_uint8
+
+    return final_mask
+

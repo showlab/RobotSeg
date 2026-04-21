@@ -27,6 +27,7 @@ python ../tools/evaluator.py \
 --gt_root /workspace/RobotSeg/dataset/VRS/test/mask_gt \
 --pred_root ./output_auto_semi/${save_dir_name}/${prediction_name} \
 --num_processes ${workers} \
+--strict \
 --do_not_skip_first_and_last_frame \
 --category ${category}
 
@@ -36,4 +37,5 @@ python ../tools/evaluator.py \
 --gt_root /workspace/RobotSeg/dataset/RoboEngine/test/mask \
 --pred_root ./output_auto_semi/${save_dir_name}/${prediction_name} \
 --num_processes ${workers} \
+--strict \
 --do_not_skip_first_and_last_frame

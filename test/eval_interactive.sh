@@ -29,5 +29,6 @@ python ../tools/evaluator.py \
 --gt_root /workspace/RobotSeg/dataset/VRS/test/mask_gt \
 --pred_root ./output_interactive/${save_dir_name}/${prediction_name} \
 --num_processes ${workers} \
+--strict \
 --do_not_skip_first_and_last_frame \
 --category ${category}

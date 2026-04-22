@@ -85,7 +85,7 @@ def iou_loss(
 
 
 #######################################################################################
-########## Label-Efficient Training: Cycle + Semantic + Patch Consistency Loss ########
+########## Label-Efficient Training: Cycle + Semantic + Patch + Structure Loss ########
 #######################################################################################
 
 def masked_avg_feat(emb, mask):
@@ -98,7 +98,7 @@ def masked_avg_feat(emb, mask):
         mask = F.interpolate(mask, size=(H, W), mode='bilinear', align_corners=False)
     num = (emb * mask[:, :, None, :, :]).flatten(3).sum(-1)
     den = mask.flatten(2).sum(-1).clamp_min(1e-6)
-    return num / den.unsqueeze(-1)  # [N,C]
+    return num / den.unsqueeze(-1)
 
 
 def select_best_mask_index(loss_multimask, loss_multidice, w_mask, w_dice):
@@ -186,7 +186,7 @@ class MultiStepMultiMasksAndIous_LET(nn.Module):
         pred_obj_scores=False,
         focal_gamma_obj_score=0.0,
         focal_alpha_obj_score=-1,
-        embedding_loss_type="cosine",
+        semantic_loss_type="cosine",
     ):
         super().__init__()
         self.weight_dict = weight_dict
@@ -206,7 +206,7 @@ class MultiStepMultiMasksAndIous_LET(nn.Module):
         self.supervise_all_iou = supervise_all_iou
         self.iou_use_l1_loss = iou_use_l1_loss
         self.pred_obj_scores = pred_obj_scores
-        self.embedding_loss_type = embedding_loss_type
+        self.semantic_loss_type = semantic_loss_type
 
         self.anchor_feat = None
 
@@ -247,7 +247,7 @@ class MultiStepMultiMasksAndIous_LET(nn.Module):
         # using gt
         first_best_mask = target_masks_first  # [N,1,H,W]
         first_embeddings_sel = first_embeddings[:, None, ...]      # [N,1,C,H,W]
-        self.anchor_feat = F.normalize(masked_avg_feat(first_embeddings_sel, first_best_mask), dim=-1)  # [N,C]
+        self.anchor_feat = F.normalize(masked_avg_feat(first_embeddings_sel, first_best_mask), dim=-1)  # [N,1,C]
 
         # === Step 2: Iterate over all frames ===
         T = len(outs_batch)
@@ -282,9 +282,8 @@ class MultiStepMultiMasksAndIous_LET(nn.Module):
             "loss_structure": torch.zeros((), device=device, dtype=dtype),
         }
 
-        src_masks_list = outputs["multistep_pred_multimasks_high_res"]   # list([N,M,H,W])，M is multiple mask channels
+        src_masks_list = outputs["multistep_pred_multimasks_high_res"]   # list([N,M,H,W]), N is multiple refinement steps, M is multiple mask channels
 
-        # align with multiple step refinement
         src_embeddings_list = outputs["multistep_embeddings"]            # list([N,C,H,W])
         if len(src_embeddings_list) == 1 and len(src_masks_list) > 1:
             src_embeddings_list = src_embeddings_list * len(src_masks_list)
@@ -294,7 +293,7 @@ class MultiStepMultiMasksAndIous_LET(nn.Module):
 
         # -------- (a) Multi-step refinement on a single frame -------- #
         best_inds_for_sem_last = None  # Record the channel selected at the final step
-        pred_mask_prob_last = None    # Record the mask probability map selected at the final step
+        pred_mask_prob_last = None    # Record the mask probability map selected at the final refinement step
 
         for src_masks, src_embeddings, ious, object_score_logits in zip(
             src_masks_list, src_embeddings_list, ious_list, object_score_logits_list
@@ -314,21 +313,21 @@ class MultiStepMultiMasksAndIous_LET(nn.Module):
             structure_pred = torch.sigmoid(structure_logits)
 
             # Compute a structure map from target at the original resolution
-            edge_true = torch.abs(KF.laplacian(target_masks, kernel_size=3))  # [B, 1, H, W]
-            edge_true = edge_true / (edge_true.amax(dim=[2, 3], keepdim=True) + 1e-6)
+            structure_true = torch.abs(KF.laplacian(target_masks, kernel_size=3))  # [B, 1, H, W]
+            structure_true = structure_true / (structure_true.amax(dim=[2, 3], keepdim=True) + 1e-6)
 
             # Match channels if needed
-            if edge_true.shape[1] == 1 and structure_pred.shape[1] > 1:
-                edge_true = edge_true.expand(-1, structure_pred.shape[1], -1, -1)
+            if structure_true.shape[1] == 1 and structure_pred.shape[1] > 1:
+                structure_true = structure_true.expand(-1, structure_pred.shape[1], -1, -1)
 
             # L1 loss at full resolution
-            edge_loss = F.l1_loss(structure_pred, edge_true, reduction="mean")
-            losses["loss_structure"] += edge_loss / num_objects
+            structure_loss = F.l1_loss(structure_pred, structure_true, reduction="mean")
+            losses["loss_structure"] += structure_loss / num_objects
 
-        # -------- (b) after multi-step refinement, compute patch consistency loss on intermediate frames -------- #
+        # -------- (b) after multi-step refinement, compute patch consistency loss on the last refinement step of this frame -------- #
         if compute_pat and (pred_mask_prob_last is not None):
-            sc_loss = patch_consistency_loss(pred_mask_prob_last, target_masks)
-            losses["loss_patch"] += sc_loss / num_objects
+            patch_loss = patch_consistency_loss(pred_mask_prob_last, target_masks)
+            losses["loss_patch"] += patch_loss / num_objects
 
         # -------- (c) weighted-sum -------- #
         losses[CORE_LOSS_KEY] = self.reduce_loss(losses)
@@ -392,14 +391,14 @@ class MultiStepMultiMasksAndIous_LET(nn.Module):
 
             pred_mask_prob = src_masks.sigmoid()[batch_inds, best_inds_for_sem][:, None, ...]  # [N,1,H,W]
             cur_embeddings_sel = src_embeddings[:, None, ...]  # [N,1,C,H,W]
-            cur_feat = F.normalize(masked_avg_feat(cur_embeddings_sel, pred_mask_prob), dim=-1)
+            cur_feat = F.normalize(masked_avg_feat(cur_embeddings_sel, pred_mask_prob), dim=-1) # [N,1,C]
 
-            if self.embedding_loss_type == "l2":
-                ec_loss = F.mse_loss(cur_feat, self.anchor_feat)
+            if self.semantic_loss_type == "l2":
+                semantic_loss = F.mse_loss(cur_feat, self.anchor_feat)
             else:
-                ec_loss = 1.0 - (cur_feat * self.anchor_feat).sum(dim=-1).mean()
+                semantic_loss = 1.0 - (cur_feat * self.anchor_feat).sum(dim=-1).mean()
 
-            losses["loss_semantic"] += ec_loss / num_objects
+            losses["loss_semantic"] += semantic_loss / num_objects
         else:
             if best_inds_for_cyc is None:
                 best_inds_for_sem = select_mask_index_no_gt_by_iou(ious)

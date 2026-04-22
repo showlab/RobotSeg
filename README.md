@@ -250,13 +250,28 @@ sh eval_interactive.sh
 ```
 
 ### 7.6 Training
+(a) Prepare pseudo mask for video training
+
+_If you train on the VRS dataset, you can **skip** this step, since the required pseudo mask is already included in the released dataset and can be used directly. This step is mainly needed when training on your own custom video dataset._
+
+```
+curl -Ls https://micro.mamba.pm/install.sh | bash
+source ~/.bashrc
+cd dinov3
+micromamba env create -f conda.yaml
+micromamba activate dinov3
+cd notebooks
+python generate_pseudo_masks.py
+```
+
+(b) Start training
 ```
 sh train.sh
 ```
 
 ## 🙌 8. Acknowledgments
 
-RobotSeg is built upon [SAM 2](https://github.com/facebookresearch/sam2).
+RobotSeg is built upon [SAM 2](https://github.com/facebookresearch/sam2) and [DINOv3](https://github.com/facebookresearch/dinov3).
 
 
 ## 📚 9. Citation

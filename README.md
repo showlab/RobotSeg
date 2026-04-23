@@ -260,7 +260,6 @@ source ~/.bashrc
 cd dinov3
 micromamba env create -f conda.yaml
 micromamba activate dinov3
-cd notebooks
 python generate_pseudo_masks.py
 ```
 

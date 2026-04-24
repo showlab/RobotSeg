@@ -2,7 +2,7 @@
 
 # Model
 model:
-  _target_: robotseg.modeling.robotseg_base_infer.RobotSegBase
+  _target_: robotseg.modeling.robotseg_base.RobotSegBase
   image_encoder:
     _target_: robotseg.modeling.backbones.image_encoder.ImageEncoder
     scalp: 1

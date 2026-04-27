@@ -4,7 +4,7 @@ import time
 import torch
 import torch.nn.functional as F
 from tqdm import tqdm
-from robotseg.modeling.robotseg_base_infer import NO_OBJ_SCORE, RobotSegBase
+from robotseg.modeling.robotseg_base import NO_OBJ_SCORE, RobotSegBase
 from robotseg.utils.misc import concat_points, fill_holes_in_mask_scores, load_video_frames
 
 

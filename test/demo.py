@@ -12,7 +12,7 @@ from natsort import natsorted
 from utils import *
 
 INPUT_DIR = "./demo_video"
-OUTPUT_DIR = "./demo_video_robotseg"
+OUTPUT_ROOT = "./demo_video_robotseg"
 
 CATEGORY = "robot"   # choices: "arm", "gripper", "robot"
 CKPT_NAME = "robotseg"
@@ -32,6 +32,7 @@ def main():
     if len(image_list) == 0:
         raise FileNotFoundError(f"No images found in {INPUT_DIR}")
 
+    OUTPUT_DIR = os.path.join(OUTPUT_ROOT, CATEGORY)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     import torch
@@ -102,4 +103,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

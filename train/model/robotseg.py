@@ -3,7 +3,7 @@ import logging
 import numpy as np
 import torch
 import torch.distributed
-from robotseg.modeling.robotseg_base_train import RobotSegBase
+from robotseg.modeling.robotseg_base import RobotSegBase
 from robotseg.modeling.robotseg_utils import (
     get_1d_sine_pe,
     get_next_point,

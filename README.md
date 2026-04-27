@@ -264,6 +264,8 @@ python generate_pseudo_masks.py
 ```
 
 (b) Start training
+
+Download [sam2.1_hiera_tiny.pt](https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_tiny.pt) into _checkpoints_ folder, then run:
 ```
 sh train.sh
 ```

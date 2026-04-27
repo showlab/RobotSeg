@@ -22,10 +22,10 @@ dataset:
   root: /workspace/RobotSeg/dataset
   roboengine_img_folder: ${dataset.root}/RoboEngine/train/image
   roboengine_gt_folder: ${dataset.root}/RoboEngine/train/mask
-  roboengine_file_list_txt: txt/roboengine_train_list.txt
+  roboengine_file_list_txt: train/txt/roboengine_train_list.txt
   vrs_img_folder: ${dataset.root}/VRS/train/image
   vrs_gt_folder: ${dataset.root}/VRS/train/mask_gt_dinov3
-  vrs_file_list_txt: txt/vrs_train_list.txt
+  vrs_file_list_txt: train/txt/vrs_train_list.txt
 
 # Video transforms
 vos:
@@ -355,7 +355,7 @@ trainer:
 
       state_dict:
         _target_: train.utils.checkpoint_utils.load_checkpoint_and_apply_kernels
-        checkpoint_path: ../checkpoints/sam2.1_hiera_tiny.pt
+        checkpoint_path: checkpoints/sam2.1_hiera_tiny.pt
         ckpt_state_dict_keys: ['model']
 
 # SLURM args if running on a cluster

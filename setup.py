@@ -50,6 +50,7 @@ EXTRA_PACKAGES = {
         "opencv-contrib-python-headless==4.11.0.86",
         "submitit>=1.5.1",
         "pycocoevalcap",
+        "natsort",
     ],
 }
 

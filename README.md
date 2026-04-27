@@ -276,11 +276,12 @@ RobotSeg is built upon [SAM 2](https://github.com/facebookresearch/sam2) and [DI
 ## 📚 9. Citation
 If you find our work useful, please consider citing our paper:
 ```
-@article{mei2025robotseg,
-      title={RobotSeg: A Model and Dataset for Segmenting Robots in Image and Video}, 
-      author={Mei, Haiyang and Huang, Qiming and Ci, Hai and Shou, Mike Zheng},
-      journal={arXiv:2511.22950},
-      year={2025}
+@InProceedings{Mei_2026_CVPR_RobotSeg,
+    author    = {Mei, Haiyang and Huang, Qiming and Ci, Hai and Shou, Mike Zheng},
+    title     = {RobotSeg: A Model and Dataset for Segmenting Robots in Image and Video},
+    booktitle = {Proceedings of the Computer Vision and Pattern Recognition Conference (CVPR)},
+    month     = {June},
+    year      = {2026},
 }
 ```
 

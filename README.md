@@ -63,6 +63,8 @@ We introduce **RobotSeg**, the first foundation model for robot segmentation tha
 [🙌 8. Acknowledgments](#-8-acknowledgments)  
 [📚 9. Citation](#-9-citation)
 
+### 🎉 2026.04.29 Update
+We have fully released the dataset and all code for training, testing, and evaluation. Welcome to try it out! 🚀
 
 ## 🚀 1. Introduction
 
